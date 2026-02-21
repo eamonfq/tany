@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-brand-pink hover:bg-brand-pink-dark text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  .btn-secondary {
+    @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  .btn-success {
+    @apply bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  .btn-danger {
+    @apply bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-4;
+  }
+  .input-field {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-pink focus:border-brand-pink outline-none transition-all duration-200;
+  }
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+}
+
+/* Print mode: remove dark backgrounds for B&W printing */
+/* Applied by pdfGenerator.js and @media print */
+.print-mode .invoice-header-footer {
+  background-color: transparent !important;
+  color: #000 !important;
+  border-top: 2px solid #000;
+  border-bottom: 2px solid #000;
+}
+
+.print-mode .invoice-header-footer img {
+  filter: none !important;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .invoice-header-footer {
+    background-color: transparent !important;
+    color: #000 !important;
+    border-top: 2px solid #000;
+    border-bottom: 2px solid #000;
+  }
+
+  .invoice-header-footer img {
+    filter: none !important;
+  }
+
+  body {
+    background: #fff !important;
+  }
+}

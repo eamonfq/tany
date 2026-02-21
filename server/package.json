@@ -1,0 +1,14 @@
+{
+  "name": "eventos-tany-server",
+  "version": "1.0.0",
+  "description": "Backend API for Eventos Tany",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "sql.js": "^1.11.0"
+  }
+}

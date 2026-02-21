@@ -1,0 +1,11 @@
+{
+  "name": "eventos-tany",
+  "version": "1.0.0",
+  "description": "Sistema de gestión para Eventos Tany - Renta de brincolines, mesas, sillas y mobiliario",
+  "scripts": {
+    "dev": "node dev.js",
+    "server": "node server/index.js",
+    "client": "npm run dev --prefix client"
+  },
+  "devDependencies": {}
+}
