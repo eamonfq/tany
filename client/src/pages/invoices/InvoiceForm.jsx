@@ -165,7 +165,7 @@ export default function InvoiceForm() {
 
   // Client selection
   function handleClientChange(clientId) {
-    const client = clients.find((c) => c.id === clientId);
+    const client = clients.find((c) => String(c.id) === String(clientId));
     if (client) {
       setForm((prev) => ({
         ...prev,
