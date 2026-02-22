@@ -1,6 +1,20 @@
 import { format, formatDistanceToNow, parseISO, isValid } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+// SQLite CURRENT_TIMESTAMP stores UTC without 'Z' suffix.
+// parseISO treats strings without timezone as local time, causing offset issues.
+// This helper ensures UTC strings are parsed correctly.
+function parseDate(dateStr) {
+  if (!dateStr) return null;
+  if (typeof dateStr !== 'string') return dateStr;
+  // If it has no timezone indicator (Z or +/-), append Z to treat as UTC
+  const trimmed = dateStr.trim();
+  if (!/[Z+\-]\d{0,4}$/.test(trimmed) && /\d{2}:\d{2}/.test(trimmed)) {
+    return parseISO(trimmed.replace(' ', 'T') + 'Z');
+  }
+  return parseISO(trimmed);
+}
+
 export function formatCurrency(amount) {
   if (amount == null || isNaN(amount)) return '$0.00';
   return new Intl.NumberFormat('es-MX', {
@@ -14,7 +28,7 @@ export function formatCurrency(amount) {
 export function formatDate(dateStr) {
   if (!dateStr) return '';
   try {
-    const date = typeof dateStr === 'string' ? parseISO(dateStr) : dateStr;
+    const date = typeof dateStr === 'string' ? parseDate(dateStr) : dateStr;
     if (!isValid(date)) return dateStr;
     return format(date, "d 'de' MMMM yyyy", { locale: es });
   } catch {
@@ -25,7 +39,7 @@ export function formatDate(dateStr) {
 export function formatDateShort(dateStr) {
   if (!dateStr) return '';
   try {
-    const date = typeof dateStr === 'string' ? parseISO(dateStr) : dateStr;
+    const date = typeof dateStr === 'string' ? parseDate(dateStr) : dateStr;
     if (!isValid(date)) return dateStr;
     return format(date, 'dd/MM/yyyy', { locale: es });
   } catch {
@@ -36,7 +50,7 @@ export function formatDateShort(dateStr) {
 export function formatDateRelative(dateStr) {
   if (!dateStr) return '';
   try {
-    const date = typeof dateStr === 'string' ? parseISO(dateStr) : dateStr;
+    const date = typeof dateStr === 'string' ? parseDate(dateStr) : dateStr;
     if (!isValid(date)) return dateStr;
     return formatDistanceToNow(date, { addSuffix: true, locale: es });
   } catch {
@@ -47,7 +61,7 @@ export function formatDateRelative(dateStr) {
 export function formatDateDay(dateStr) {
   if (!dateStr) return '';
   try {
-    const date = typeof dateStr === 'string' ? parseISO(dateStr) : dateStr;
+    const date = typeof dateStr === 'string' ? parseDate(dateStr) : dateStr;
     if (!isValid(date)) return dateStr;
     return format(date, "EEEE d 'de' MMMM", { locale: es });
   } catch {
