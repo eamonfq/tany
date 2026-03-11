@@ -78,12 +78,13 @@ export default function ClientForm() {
     setSaving(true);
     try {
       const payload = { ...form };
-      // Clean up empty optional fields
-      if (!payload.email) delete payload.email;
-      if (!payload.address) delete payload.address;
+      // Clean up empty optional fields - send null instead of empty strings
+      if (!payload.email) payload.email = null;
+      if (!payload.address) payload.address = null;
+      if (!payload.notes) payload.notes = null;
       if (!payload.special_date) {
-        delete payload.special_date;
-        delete payload.special_date_label;
+        payload.special_date = null;
+        payload.special_date_label = null;
       }
 
       if (isEditing) {
@@ -98,7 +99,8 @@ export default function ClientForm() {
       }
     } catch (error) {
       console.error('Error saving client:', error);
-      toast.error('Error al guardar el cliente');
+      const msg = error.response?.data?.error || 'Error al guardar el cliente';
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
