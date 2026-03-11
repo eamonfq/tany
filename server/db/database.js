@@ -131,12 +131,6 @@ async function initDatabase() {
     wrapper.save();
     console.log('Schema created');
 
-    // Run seed
-    const { seedDatabase } = require('./seed');
-    seedDatabase(wrapper);
-    wrapper.save();
-    console.log('Seed data inserted');
-
     dbInstance = wrapper;
     return wrapper;
   }
