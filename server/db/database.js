@@ -14,8 +14,10 @@ class PreparedStatement {
 
   run(params = []) {
     this.db.exec(this.sql, Array.isArray(params) ? params : [params]);
+    const changes = this.db.getRowsModified();
+    const lastInsertRowid = this._getLastId();
     this.db.save();
-    return { changes: this.db.getRowsModified(), lastInsertRowid: this._getLastId() };
+    return { changes, lastInsertRowid };
   }
 
   get(params = []) {
@@ -62,11 +64,11 @@ class PreparedStatement {
 
   _getLastId() {
     try {
-      const stmt = this.db.db.prepare('SELECT last_insert_rowid() as id');
-      stmt.step();
-      const id = stmt.get()[0];
-      stmt.free();
-      return id;
+      const result = this.db.db.exec('SELECT last_insert_rowid() as id');
+      if (result.length > 0 && result[0].values.length > 0) {
+        return result[0].values[0][0];
+      }
+      return null;
     } catch (e) {
       return null;
     }

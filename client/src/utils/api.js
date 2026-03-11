@@ -7,6 +7,30 @@ const api = axios.create({
   },
 });
 
+// Attach auth role header
+api.interceptors.request.use((config) => {
+  try {
+    const raw = localStorage.getItem('tany-auth');
+    if (raw) {
+      const auth = JSON.parse(raw);
+      if (auth?.role) config.headers['x-user-role'] = auth.role;
+    }
+  } catch {}
+  return config;
+});
+
+// On 401, clear session and reload
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem('tany-auth');
+      window.location.reload();
+    }
+    return Promise.reject(err);
+  }
+);
+
 // Items
 export const itemsApi = {
   getAll: (category) => api.get('/items', { params: { category } }),

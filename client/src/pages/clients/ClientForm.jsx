@@ -93,13 +93,15 @@ export default function ClientForm() {
         navigate(`/clients/${id}`);
       } else {
         const res = await clientsApi.create(payload);
-        const newClient = res.data.data || res.data;
+        const newClient = res.data?.data || res.data;
         toast.success('Cliente creado');
-        navigate(`/clients/${newClient.id}`);
+        navigate(newClient?.id ? `/clients/${newClient.id}` : '/clients');
       }
     } catch (error) {
       console.error('Error saving client:', error);
-      const msg = error.response?.data?.error || 'Error al guardar el cliente';
+      console.error('Response:', error.response);
+      console.error('Data:', error.response?.data);
+      const msg = error.response?.data?.error || error.message || 'Error al guardar el cliente';
       toast.error(msg);
     } finally {
       setSaving(false);

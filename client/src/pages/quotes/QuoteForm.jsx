@@ -193,7 +193,7 @@ export default function QuoteFormPage() {
         savedQuote = await quotesApi.create(payload);
       }
 
-      const quoteId = savedQuote.data.id || id;
+      const quoteId = savedQuote.data?.id || id;
 
       if (sendAfterSave) {
         await quotesApi.updateStatus(quoteId, 'Enviada');

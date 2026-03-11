@@ -10,6 +10,7 @@ import {
   X,
 } from 'lucide-react';
 import { invoicesApi } from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
 import {
   formatCurrency,
   formatDate,
@@ -39,6 +40,7 @@ export default function InvoiceDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
+  const { isAdmin } = useAuth();
 
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -292,13 +294,15 @@ export default function InvoiceDetail() {
           </button>
 
           {/* Delete */}
-          <button
-            onClick={() => setShowDeleteModal(true)}
-            className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
-          >
-            <Trash2 size={16} />
-            Eliminar
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
+            >
+              <Trash2 size={16} />
+              Eliminar
+            </button>
+          )}
         </div>
       </div>
 

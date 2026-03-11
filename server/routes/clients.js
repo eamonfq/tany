@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDb } = require('../db/database');
+const requireAdmin = require('../middleware/requireAdmin');
 
 // GET /api/clients - List all active clients, optional ?status= and ?search=
 router.get('/', (req, res) => {
@@ -92,8 +93,17 @@ router.post('/', (req, res) => {
       special_date || null, special_date_label || null
     ]);
 
-    const client = db.prepare('SELECT * FROM clients WHERE id = ?').get([result.lastInsertRowid]);
-    res.status(201).json(client);
+    let client = null;
+    if (result.lastInsertRowid) {
+      client = db.prepare('SELECT * FROM clients WHERE id = ?').get([result.lastInsertRowid]);
+    }
+    if (!client) {
+      // Fallback: buscar por nombre y telefono
+      client = db.prepare(
+        'SELECT * FROM clients WHERE name = ? AND phone = ? ORDER BY id DESC LIMIT 1'
+      ).get([name, phone]);
+    }
+    res.status(201).json(client || { id: result.lastInsertRowid, name, phone });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -138,7 +148,7 @@ router.put('/:id', (req, res) => {
 });
 
 // DELETE /api/clients/:id (soft delete)
-router.delete('/:id', (req, res) => {
+router.delete('/:id', requireAdmin, (req, res) => {
   try {
     const db = getDb();
     const clientId = Number(req.params.id);

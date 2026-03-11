@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDb } = require('../db/database');
+const requireAdmin = require('../middleware/requireAdmin');
 
 // Helper: generate next quote number COT-YYYY-NNNN
 function generateQuoteNumber(db) {
@@ -107,7 +108,13 @@ router.post('/', (req, res) => {
       validUntil, notes || null
     ]);
 
-    const quoteId = result.lastInsertRowid;
+    let quoteId = result.lastInsertRowid;
+
+    // Fallback: si lastInsertRowid es null, buscar por quote_number
+    if (!quoteId) {
+      const found = db.prepare('SELECT id FROM quotes WHERE quote_number = ?').get([quoteNumber]);
+      quoteId = found ? found.id : null;
+    }
 
     // Insert quote items
     for (const item of items) {
@@ -123,7 +130,7 @@ router.post('/', (req, res) => {
     // Return the created quote with items
     const quote = db.prepare('SELECT * FROM quotes WHERE id = ?').get([quoteId]);
     const quoteItems = db.prepare('SELECT * FROM quote_items WHERE quote_id = ?').all([quoteId]);
-    res.status(201).json({ ...quote, items: quoteItems });
+    res.status(201).json({ ...(quote || { id: quoteId }), items: quoteItems || [] });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -336,7 +343,7 @@ router.post('/:id/convert', (req, res) => {
 });
 
 // DELETE /api/quotes/:id
-router.delete('/:id', (req, res) => {
+router.delete('/:id', requireAdmin, (req, res) => {
   try {
     const db = getDb();
     const quoteId = Number(req.params.id);

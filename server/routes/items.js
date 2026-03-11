@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDb } = require('../db/database');
+const requireAdmin = require('../middleware/requireAdmin');
 
 // GET /api/items - List all active items, optional ?category=
 router.get('/', (req, res) => {
@@ -77,7 +78,7 @@ router.put('/:id', (req, res) => {
 });
 
 // DELETE /api/items/:id (soft delete)
-router.delete('/:id', (req, res) => {
+router.delete('/:id', requireAdmin, (req, res) => {
   try {
     const db = getDb();
     const existing = db.prepare('SELECT * FROM items WHERE id = ?').get([Number(req.params.id)]);

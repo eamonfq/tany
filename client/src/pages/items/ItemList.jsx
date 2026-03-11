@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { itemsApi } from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
 import { formatCurrency } from '../../utils/formatters';
 import { ITEM_CATEGORIES } from '../../utils/constants';
 import { Package, Plus, Edit2, Trash2, X, Save } from 'lucide-react';
@@ -10,6 +11,7 @@ import { useToast } from '../../components/shared/Toast';
 
 export default function ItemsPage() {
   const toast = useToast();
+  const { isAdmin } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('Todos');
@@ -144,9 +146,11 @@ export default function ItemsPage() {
                     <button onClick={() => openForm(item)} className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1">
                       <Edit2 size={14} /> Editar
                     </button>
-                    <button onClick={() => setDeleteConfirm(item)} className="text-sm text-red-600 hover:text-red-800 flex items-center gap-1">
-                      <Trash2 size={14} /> Eliminar
-                    </button>
+                    {isAdmin && (
+                      <button onClick={() => setDeleteConfirm(item)} className="text-sm text-red-600 hover:text-red-800 flex items-center gap-1">
+                        <Trash2 size={14} /> Eliminar
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

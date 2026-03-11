@@ -19,7 +19,9 @@ const remindersRouter = require('./routes/reminders');
 const templatesRouter = require('./routes/templates');
 const dashboardRouter = require('./routes/dashboard');
 const whatsappRouter = require('./routes/whatsapp');
+const authRouter = require('./routes/auth');
 
+app.use('/api/auth', authRouter);
 app.use('/api/items', itemsRouter);
 app.use('/api/clients', clientsRouter);
 app.use('/api/quotes', quotesRouter);

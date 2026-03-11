@@ -10,8 +10,10 @@ import {
   Calendar,
   Bell,
   Save,
+  Trash2,
 } from 'lucide-react';
 import { clientsApi } from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
 import {
   formatCurrency,
   formatDate,
@@ -24,13 +26,16 @@ import { formatPhoneDisplay } from '../../utils/whatsapp';
 import StatusBadge from '../../components/shared/StatusBadge';
 import WhatsAppButton from '../../components/shared/WhatsAppButton';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
+import ConfirmModal from '../../components/shared/ConfirmModal';
 import { useToast } from '../../components/shared/Toast';
 
 export default function ClientDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
+  const { isAdmin } = useAuth();
   const [client, setClient] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [history, setHistory] = useState({ quotes: [], invoices: [], reminders: [] });
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState('');
@@ -163,6 +168,15 @@ export default function ClientDetail() {
             <Edit size={16} />
             Editar
           </button>
+          {isAdmin && (
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
+            >
+              <Trash2 size={16} />
+              Eliminar
+            </button>
+          )}
         </div>
       </div>
 
@@ -333,6 +347,23 @@ export default function ClientDetail() {
           </div>
         )}
       </div>
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={async () => {
+          try {
+            await clientsApi.delete(id);
+            toast.success('Cliente eliminado');
+            navigate('/clients');
+          } catch (error) {
+            toast.error('Error al eliminar el cliente');
+          }
+        }}
+        title="Eliminar cliente"
+        message={`Se desactivara el cliente "${client.name}". Esta accion no se puede deshacer.`}
+        confirmText="Eliminar"
+        variant="danger"
+      />
     </div>
   );
 }

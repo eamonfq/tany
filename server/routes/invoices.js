@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDb } = require('../db/database');
+const requireAdmin = require('../middleware/requireAdmin');
 
 // Helper: add days to a date string
 function addDays(dateStr, days) {
@@ -326,7 +327,7 @@ router.put('/:id/payment', (req, res) => {
 });
 
 // DELETE /api/invoices/:id
-router.delete('/:id', (req, res) => {
+router.delete('/:id', requireAdmin, (req, res) => {
   try {
     const db = getDb();
     const invoiceId = Number(req.params.id);

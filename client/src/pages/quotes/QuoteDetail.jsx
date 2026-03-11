@@ -12,6 +12,7 @@ import {
   User,
 } from 'lucide-react';
 import { quotesApi } from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { QUOTE_STATUSES, LOGO_URL, CONTRACT_CONDITIONS } from '../../utils/constants';
 import { openWhatsApp, formatPhoneDisplay } from '../../utils/whatsapp';
@@ -24,6 +25,7 @@ import { useToast } from '../../components/shared/Toast';
 export default function QuoteDetailPage() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { isAdmin } = useAuth();
   const { id } = useParams();
 
   const [quote, setQuote] = useState(null);
@@ -230,12 +232,14 @@ export default function QuoteDetailPage() {
           </button>
 
           {/* Delete */}
-          <button
-            onClick={() => setShowDeleteModal(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
-          >
-            <Trash2 size={16} />
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
+            >
+              <Trash2 size={16} />
+            </button>
+          )}
         </div>
       </div>
 
