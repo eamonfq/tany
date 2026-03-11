@@ -6,15 +6,17 @@ import { Package, Plus, Edit2, Trash2, X, Save } from 'lucide-react';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import EmptyState from '../../components/shared/EmptyState';
 import ConfirmModal from '../../components/shared/ConfirmModal';
+import { useToast } from '../../components/shared/Toast';
 
 export default function ItemsPage() {
+  const toast = useToast();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [form, setForm] = useState({ name: '', category: 'Brincolines', description: '', unit_price: '' });
+  const [form, setForm] = useState({ name: '', category: 'Brincolines', description: '', unit_price: '', discount_price: '' });
 
   useEffect(() => { loadItems(); }, []);
 
@@ -42,10 +44,10 @@ export default function ItemsPage() {
   function openForm(item = null) {
     if (item) {
       setEditingItem(item);
-      setForm({ name: item.name, category: item.category, description: item.description || '', unit_price: item.unit_price });
+      setForm({ name: item.name, category: item.category, description: item.description || '', unit_price: item.unit_price, discount_price: item.discount_price || '' });
     } else {
       setEditingItem(null);
-      setForm({ name: '', category: 'Brincolines', description: '', unit_price: '' });
+      setForm({ name: '', category: 'Brincolines', description: '', unit_price: '', discount_price: '' });
     }
     setShowForm(true);
   }
@@ -53,16 +55,18 @@ export default function ItemsPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     try {
-      const data = { ...form, unit_price: Number(form.unit_price) };
+      const data = { ...form, unit_price: Number(form.unit_price), discount_price: form.discount_price ? Number(form.discount_price) : null };
       if (editingItem) {
         await itemsApi.update(editingItem.id, data);
       } else {
         await itemsApi.create(data);
       }
       setShowForm(false);
+      toast.success(editingItem ? 'Articulo actualizado' : 'Articulo creado');
       loadItems();
     } catch (error) {
       console.error('Error saving item:', error);
+      toast.error('Error al guardar el articulo');
     }
   }
 
@@ -70,9 +74,11 @@ export default function ItemsPage() {
     try {
       await itemsApi.delete(id);
       setDeleteConfirm(null);
+      toast.success('Articulo eliminado');
       loadItems();
     } catch (error) {
       console.error('Error deleting item:', error);
+      toast.error('Error al eliminar el articulo');
     }
   }
 
@@ -127,7 +133,12 @@ export default function ItemsPage() {
                       <h3 className="font-semibold text-gray-900">{item.name}</h3>
                       <p className="text-sm text-gray-500 mt-1">{item.description}</p>
                     </div>
-                    <span className="text-lg font-bold text-brand-pink ml-3">{formatCurrency(item.unit_price)}</span>
+                    <div className="text-right ml-3 shrink-0">
+                      <span className="text-lg font-bold text-brand-pink">{formatCurrency(item.unit_price)}</span>
+                      {item.discount_price != null && (
+                        <p className="text-xs text-green-600 font-medium">Desc: {formatCurrency(item.discount_price)}</p>
+                      )}
+                    </div>
                   </div>
                   <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
                     <button onClick={() => openForm(item)} className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1">
@@ -167,9 +178,15 @@ export default function ItemsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
                 <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="input-field" rows={2} />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Precio unitario *</label>
-                <input type="number" step="0.01" min="0" value={form.unit_price} onChange={e => setForm({ ...form, unit_price: e.target.value })} className="input-field" required />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Precio normal *</label>
+                  <input type="number" step="0.01" min="0" value={form.unit_price} onChange={e => setForm({ ...form, unit_price: e.target.value })} className="input-field" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Precio con descuento</label>
+                  <input type="number" step="0.01" min="0" value={form.discount_price} onChange={e => setForm({ ...form, discount_price: e.target.value })} className="input-field" placeholder="Opcional" />
+                </div>
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="submit" className="btn-primary flex-1 flex items-center justify-center gap-2">

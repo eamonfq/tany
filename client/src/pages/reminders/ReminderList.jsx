@@ -31,6 +31,7 @@ import { openWhatsApp, formatPhoneDisplay } from '../../utils/whatsapp';
 import { REMINDER_TYPES, PRIORITY_OPTIONS } from '../../utils/constants';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import EmptyState from '../../components/shared/EmptyState';
+import { useToast } from '../../components/shared/Toast';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -323,6 +324,7 @@ function SectionHeader({ icon: Icon, title, count, color, dateLabel }) {
 
 export default function RemindersPage() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [allReminders, setAllReminders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
@@ -358,8 +360,10 @@ export default function RemindersPage() {
     try {
       await remindersApi.updateStatus(id, status);
       await loadReminders();
+      toast.success(status === 'Enviado' ? 'Marcado como enviado' : 'Recordatorio descartado');
     } catch (error) {
       console.error('Error updating reminder status:', error);
+      toast.error('Error al actualizar el recordatorio');
     } finally {
       setUpdatingId(null);
     }

@@ -19,9 +19,11 @@ import { generatePDF } from '../../utils/pdfGenerator';
 import StatusBadge from '../../components/shared/StatusBadge';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import ConfirmModal from '../../components/shared/ConfirmModal';
+import { useToast } from '../../components/shared/Toast';
 
 export default function QuoteDetailPage() {
   const navigate = useNavigate();
+  const toast = useToast();
   const { id } = useParams();
 
   const [quote, setQuote] = useState(null);
@@ -57,17 +59,21 @@ export default function QuoteDetailPage() {
       await quotesApi.updateStatus(id, newStatus);
       setQuote((prev) => ({ ...prev, status: newStatus }));
       setShowStatusDropdown(false);
+      toast.success('Estado actualizado a ' + newStatus);
     } catch (error) {
       console.error('Error updating status:', error);
+      toast.error('Error al actualizar el estado');
     }
   }
 
   async function handleDelete() {
     try {
       await quotesApi.delete(id);
+      toast.success('Cotizacion eliminada');
       navigate('/quotes');
     } catch (error) {
       console.error('Error deleting quote:', error);
+      toast.error('Error al eliminar la cotizacion');
     }
   }
 
@@ -77,10 +83,11 @@ export default function QuoteDetailPage() {
       const res = await quotesApi.convert(id, { advance_payment: Number(advancePayment) });
       const invoiceId = res.data.id || res.data.invoice_id;
       setShowConvertModal(false);
+      toast.success('Cotizacion convertida a factura');
       navigate(`/invoices/${invoiceId}`);
     } catch (error) {
       console.error('Error converting quote:', error);
-      alert('Error al convertir la cotización.');
+      toast.error('Error al convertir la cotizacion');
     } finally {
       setConverting(false);
     }

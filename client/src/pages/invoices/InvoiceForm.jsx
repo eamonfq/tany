@@ -13,10 +13,12 @@ import { formatCurrency } from '../../utils/formatters';
 import { EVENT_TYPES, CONTRACT_CONDITIONS } from '../../utils/constants';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import ClientCombobox from '../../components/shared/ClientCombobox';
+import { useToast } from '../../components/shared/Toast';
 
 export default function InvoiceForm() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
   const [searchParams] = useSearchParams();
   const fromQuoteId = searchParams.get('from_quote');
   const isEditing = Boolean(id);
@@ -192,7 +194,7 @@ export default function InvoiceForm() {
         item_id: catalogItem.id,
         description: catalogItem.name,
         quantity: 1,
-        unit_price: catalogItem.unit_price || 0,
+        unit_price: 0,
       },
     ]);
     setShowItemSearch(false);
@@ -240,19 +242,19 @@ export default function InvoiceForm() {
     e.preventDefault();
 
     if (!form.client_id) {
-      alert('Selecciona un cliente');
+      toast.warning('Selecciona un cliente');
       return;
     }
     if (!form.event_date) {
-      alert('La fecha del evento es requerida');
+      toast.warning('La fecha del evento es requerida');
       return;
     }
     if (!form.event_address) {
-      alert('La direccion del evento es requerida');
+      toast.warning('La direccion del evento es requerida');
       return;
     }
     if (items.length === 0) {
-      alert('Agrega al menos un articulo');
+      toast.warning('Agrega al menos un articulo');
       return;
     }
 
@@ -286,10 +288,11 @@ export default function InvoiceForm() {
         await invoicesApi.create(payload);
       }
 
+      toast.success(isEditing ? 'Factura actualizada' : 'Factura creada');
       navigate('/invoices');
     } catch (error) {
       console.error('Error saving invoice:', error);
-      alert('Error al guardar la factura');
+      toast.error('Error al guardar la factura');
     } finally {
       setSaving(false);
     }
@@ -482,9 +485,6 @@ export default function InvoiceForm() {
                           </p>
                           <p className="text-xs text-gray-400">{item.category}</p>
                         </div>
-                        <span className="text-sm font-semibold text-gray-900 shrink-0">
-                          {formatCurrency(item.unit_price)}
-                        </span>
                       </button>
                     ))
                   )}

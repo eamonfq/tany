@@ -15,6 +15,7 @@ import { REMINDER_TYPES, PRIORITY_OPTIONS } from '../../utils/constants';
 import { getReminderTypeIcon } from '../../utils/formatters';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import ClientCombobox from '../../components/shared/ClientCombobox';
+import { useToast } from '../../components/shared/Toast';
 
 const INITIAL_FORM = {
   client_id: '',
@@ -29,6 +30,7 @@ const INITIAL_FORM = {
 
 export default function ReminderFormPage() {
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [form, setForm] = useState(INITIAL_FORM);
   const [saving, setSaving] = useState(false);
@@ -162,9 +164,11 @@ export default function ReminderFormPage() {
       if (form.invoice_id) payload.invoice_id = form.invoice_id;
 
       await remindersApi.create(payload);
+      toast.success('Recordatorio creado');
       navigate('/reminders');
     } catch (error) {
       console.error('Error creating reminder:', error);
+      toast.error('Error al crear el recordatorio');
     } finally {
       setSaving(false);
     }

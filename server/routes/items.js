@@ -35,13 +35,13 @@ router.get('/:id', (req, res) => {
 router.post('/', (req, res) => {
   try {
     const db = getDb();
-    const { name, category, description, unit_price, image_url } = req.body;
+    const { name, category, description, unit_price, discount_price, image_url } = req.body;
     if (!name || !category || unit_price == null) {
       return res.status(400).json({ error: 'name, category y unit_price son obligatorios' });
     }
     const result = db.prepare(
-      'INSERT INTO items (name, category, description, unit_price, image_url) VALUES (?, ?, ?, ?, ?)'
-    ).run([name, category, description || null, unit_price, image_url || null]);
+      'INSERT INTO items (name, category, description, unit_price, discount_price, image_url) VALUES (?, ?, ?, ?, ?, ?)'
+    ).run([name, category, description || null, unit_price, discount_price || null, image_url || null]);
     const item = db.prepare('SELECT * FROM items WHERE id = ?').get([result.lastInsertRowid]);
     res.status(201).json(item);
   } catch (error) {
@@ -53,17 +53,18 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
   try {
     const db = getDb();
-    const { name, category, description, unit_price, image_url, is_active } = req.body;
+    const { name, category, description, unit_price, discount_price, image_url, is_active } = req.body;
     const existing = db.prepare('SELECT * FROM items WHERE id = ?').get([Number(req.params.id)]);
     if (!existing) return res.status(404).json({ error: 'Item no encontrado' });
 
     db.prepare(
-      'UPDATE items SET name = ?, category = ?, description = ?, unit_price = ?, image_url = ?, is_active = ? WHERE id = ?'
+      'UPDATE items SET name = ?, category = ?, description = ?, unit_price = ?, discount_price = ?, image_url = ?, is_active = ? WHERE id = ?'
     ).run([
       name || existing.name,
       category || existing.category,
       description !== undefined ? description : existing.description,
       unit_price != null ? unit_price : existing.unit_price,
+      discount_price !== undefined ? discount_price : existing.discount_price,
       image_url !== undefined ? image_url : existing.image_url,
       is_active != null ? is_active : existing.is_active,
       Number(req.params.id)

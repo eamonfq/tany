@@ -23,6 +23,7 @@ import StatusBadge from '../../components/shared/StatusBadge';
 import WhatsAppButton from '../../components/shared/WhatsAppButton';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import ConfirmModal from '../../components/shared/ConfirmModal';
+import { useToast } from '../../components/shared/Toast';
 
 // Status flow for the step-through dropdown
 const STATUS_FLOW = [
@@ -37,6 +38,7 @@ const STATUS_FLOW = [
 export default function InvoiceDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -73,15 +75,16 @@ export default function InvoiceDetail() {
       await invoicesApi.updateStatus(id, newStatus);
       setInvoice((prev) => ({ ...prev, status: newStatus }));
       setShowStatusDropdown(false);
+      toast.success('Estado actualizado a ' + newStatus);
     } catch (error) {
       console.error('Error updating status:', error);
-      alert('Error al actualizar el estado');
+      toast.error('Error al actualizar el estado');
     }
   }
 
   async function handlePaymentSubmit() {
     if (!paymentAmount || Number(paymentAmount) <= 0) {
-      alert('Ingresa un monto valido');
+      toast.warning('Ingresa un monto valido');
       return;
     }
     setSavingPayment(true);
@@ -94,9 +97,10 @@ export default function InvoiceDetail() {
       setPaymentAmount('');
       setPaymentType('anticipo');
       await loadInvoice();
+      toast.success('Pago registrado correctamente');
     } catch (error) {
       console.error('Error updating payment:', error);
-      alert('Error al registrar el pago');
+      toast.error('Error al registrar el pago');
     } finally {
       setSavingPayment(false);
     }
@@ -106,10 +110,11 @@ export default function InvoiceDetail() {
     setDeleting(true);
     try {
       await invoicesApi.delete(id);
+      toast.success('Factura eliminada');
       navigate('/invoices');
     } catch (error) {
       console.error('Error deleting invoice:', error);
-      alert('Error al eliminar la factura');
+      toast.error('Error al eliminar la factura');
     } finally {
       setDeleting(false);
     }

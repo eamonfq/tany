@@ -24,10 +24,12 @@ import { formatPhoneDisplay } from '../../utils/whatsapp';
 import StatusBadge from '../../components/shared/StatusBadge';
 import WhatsAppButton from '../../components/shared/WhatsAppButton';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
+import { useToast } from '../../components/shared/Toast';
 
 export default function ClientDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
   const [client, setClient] = useState(null);
   const [history, setHistory] = useState({ quotes: [], invoices: [], reminders: [] });
   const [loading, setLoading] = useState(true);
@@ -62,8 +64,10 @@ export default function ClientDetail() {
     try {
       await clientsApi.update(id, { notes });
       setNotesDirty(false);
+      toast.success('Notas guardadas');
     } catch (error) {
       console.error('Error saving notes:', error);
+      toast.error('Error al guardar las notas');
     } finally {
       setSavingNotes(false);
     }

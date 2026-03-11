@@ -37,8 +37,20 @@ app.get('/api/health', (req, res) => {
 // Start server
 async function startServer() {
   try {
-    await initDatabase();
+    const db = await initDatabase();
     console.log('Database initialized successfully');
+
+    // Migration: add discount_price column if not exists
+    try {
+      const cols = db.prepare("PRAGMA table_info(items)").all();
+      if (!cols.find(c => c.name === 'discount_price')) {
+        db.exec("ALTER TABLE items ADD COLUMN discount_price REAL");
+        db.save();
+        console.log('Migration: added discount_price column to items');
+      }
+    } catch (e) {
+      console.log('Migration check skipped:', e.message);
+    }
 
     app.listen(PORT, () => {
       console.log(`Eventos Tany API running on http://localhost:${PORT}`);

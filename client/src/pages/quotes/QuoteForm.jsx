@@ -6,6 +6,7 @@ import { formatCurrency } from '../../utils/formatters';
 import { EVENT_TYPES } from '../../utils/constants';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import ClientCombobox from '../../components/shared/ClientCombobox';
+import { useToast } from '../../components/shared/Toast';
 
 const emptyItem = () => ({
   item_id: '',
@@ -17,6 +18,7 @@ const emptyItem = () => ({
 
 export default function QuoteFormPage() {
   const navigate = useNavigate();
+  const toast = useToast();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const isEditing = Boolean(id);
@@ -140,8 +142,8 @@ export default function QuoteFormPage() {
           item_id: catalogItem.id,
           description: catalogItem.name,
           quantity: updated[index].quantity || 1,
-          unit_price: catalogItem.unit_price || 0,
-          line_total: (updated[index].quantity || 1) * (catalogItem.unit_price || 0),
+          unit_price: updated[index].unit_price || 0,
+          line_total: (updated[index].quantity || 1) * (updated[index].unit_price || 0),
         };
         return updated;
       });
@@ -161,13 +163,13 @@ export default function QuoteFormPage() {
 
   async function handleSave(sendAfterSave = false) {
     if (!form.client_id) {
-      alert('Por favor selecciona un cliente.');
+      toast.warning('Por favor selecciona un cliente');
       return;
     }
 
-    const validItems = items.filter((i) => i.description && i.unit_price > 0);
+    const validItems = items.filter((i) => i.description);
     if (validItems.length === 0) {
-      alert('Agrega al menos un artículo válido.');
+      toast.warning('Agrega al menos un articulo con descripcion');
       return;
     }
 
@@ -197,10 +199,11 @@ export default function QuoteFormPage() {
         await quotesApi.updateStatus(quoteId, 'Enviada');
       }
 
+      toast.success(sendAfterSave ? 'Cotizacion guardada y enviada' : 'Cotizacion guardada');
       navigate(`/quotes/${quoteId}`);
     } catch (error) {
       console.error('Error saving quote:', error);
-      alert('Error al guardar la cotización. Intenta de nuevo.');
+      toast.error('Error al guardar la cotizacion');
     } finally {
       setSaving(false);
     }
@@ -336,7 +339,7 @@ export default function QuoteFormPage() {
                         <optgroup key={category} label={category}>
                           {catItems.map((ci) => (
                             <option key={ci.id} value={ci.id}>
-                              {ci.name} - {formatCurrency(ci.unit_price)}
+                              {ci.name}
                             </option>
                           ))}
                         </optgroup>

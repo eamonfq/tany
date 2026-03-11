@@ -4,6 +4,7 @@ import { Save, X } from 'lucide-react';
 import { clientsApi } from '../../utils/api';
 import { CLIENT_SOURCES } from '../../utils/constants';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
+import { useToast } from '../../components/shared/Toast';
 
 const INITIAL_FORM = {
   name: '',
@@ -19,6 +20,7 @@ const INITIAL_FORM = {
 export default function ClientForm() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
   const isEditing = Boolean(id);
 
   const [form, setForm] = useState(INITIAL_FORM);
@@ -86,14 +88,17 @@ export default function ClientForm() {
 
       if (isEditing) {
         await clientsApi.update(id, payload);
+        toast.success('Cliente actualizado');
         navigate(`/clients/${id}`);
       } else {
         const res = await clientsApi.create(payload);
         const newClient = res.data.data || res.data;
+        toast.success('Cliente creado');
         navigate(`/clients/${newClient.id}`);
       }
     } catch (error) {
       console.error('Error saving client:', error);
+      toast.error('Error al guardar el cliente');
     } finally {
       setSaving(false);
     }
